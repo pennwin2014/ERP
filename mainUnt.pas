@@ -30,8 +30,8 @@ type
     TreeView1: TTreeView;
     TrayIcon1: TTrayIcon;
     Panel2: TPanel;
-    edt_search: TEdit;
-    btn_search: TButton;
+    edt_search_provider: TEdit;
+    btn_search_supplierInfo: TButton;
     lv_supplier_info: TListView;
     mmo_info: TMemo;
     btn_add_supplier: TButton;
@@ -99,14 +99,19 @@ type
     mi_delete: TMenuItem;
     dlgPntSet1: TPrinterSetupDialog;
     img1: TImage;
-    procedure edt_searchEnter(Sender: TObject);
-    procedure edt_searchExit(Sender: TObject);
-    procedure btn_searchClick(Sender: TObject);
+    pnl6: TPanel;
+    btn1: TButton;
+    btn_search_clientInfo: TButton;
+    edt_search_client: TEdit;
+    lv_client_info: TListView;
+    memo_clientInfo: TMemo;
+    procedure edt_search_providerEnter(Sender: TObject);
+    procedure edt_search_providerExit(Sender: TObject);
+    procedure btn_search_supplierInfoClick(Sender: TObject);
     procedure lv_supplier_infoDblClick(Sender: TObject);
     procedure btn_add_supplierClick(Sender: TObject);
     procedure N3Click(Sender: TObject);
     procedure cbb_supplier_codeChange(Sender: TObject);
-    procedure cbb_nameChange(Sender: TObject);
     procedure btn_search_productClick(Sender: TObject);
     procedure btn2Click(Sender: TObject);
     procedure btn_printClick(Sender: TObject);
@@ -117,13 +122,21 @@ type
     procedure dbgrd_purchase_orderDrawColumnCell(Sender: TObject;
       const Rect: TRect; DataCol: Integer; Column: TColumn;
       State: TGridDrawState);
+    procedure page_mainChange(Sender: TObject);
+    procedure edt_search_clientEnter(Sender: TObject);
+    procedure edt_search_clientExit(Sender: TObject);
+    procedure lv_client_infoDblClick(Sender: TObject);
+    procedure btn_search_clientInfoClick(Sender: TObject);
   private
     { Private declarations }
     procedure print_memo;
     procedure print_test;
+    procedure initDataByIndex(index:Integer);
+    procedure initSupplierCode;
+    procedure updProductName(code:string);
   public
     { Public declarations }
-    procedure set_supplier_info;
+    procedure set_supplier_info(code, name:string);
   end;
 
 var
@@ -134,11 +147,121 @@ implementation
 {$R *.dfm}
        uses addSupplier, setUnt, DMUnt;
 {===============================自定义方法==================================}
+procedure TFrmMain.initSupplierCode;
+var
+   tq:TADOQuery;
+   sql:string;
+begin
+  try
+    tq := TADOQuery.Create(nil);
+    tq.Connection := qry1.Connection;
+    tq.Active:=False;
+    sql := 'select distinct s_code from t_supplier_product';
+    tq.SQL.Text:=sql;
+    tq.Active:=True;
+    if tq.RecordCount <= 0 then
+    begin
+      exit;
+    end;
+    cbb_supplier_code.Items.Clear;
+    tq.First;
+    while(not tq.Eof)do
+    begin
+      cbb_supplier_code.Items.Add(tq.FieldByName('s_code').AsString);
+      tq.Next;
+    end;
+  finally
+    FreeAndNil(tq);
+  end;
+end;
+
+procedure TFrmMain.set_supplier_info(code, name:string);
+var
+   tq:TADOQuery;
+   sql:string;
+     item : TListItem;
+begin
+  try
+    tq := TADOQuery.Create(nil);
+    tq.Connection := qry1.Connection;
+    tq.Active:=False;
+    sql := 'select * from t_supplier_product';
+    if(code<>'')then
+      sql := sql + ' where s_code='+QuotedStr(code);
+    if(name<>'')then
+      sql := sql+ ' and p_name='+QuotedStr(name);
+    tq.SQL.Text:=sql;
+    tq.Active:=True;
+    if tq.RecordCount <= 0 then
+    begin
+      exit;
+    end;
+    lv_supplier_product.Clear;
+    tq.First;
+    while(not tq.Eof)do
+    begin
+      item := lv_supplier_product.Items.Add;
+      item.Caption := tq.FieldByName('id').asString;
+      item.SubItems.Add(tq.FieldByName('p_name').AsString);
+      item.SubItems.Add(tq.FieldByName('p_tid').AsString);
+      item.SubItems.Add(tq.FieldByName('p_mid').AsString);
+      item.SubItems.Add(tq.FieldByName('p_uid').AsString);
+      item.SubItems.Add(tq.FieldByName('get_cycle').AsString);
+      item.SubItems.Add(tq.FieldByName('min_pnum').AsString);
+      item.SubItems.Add(tq.FieldByName('pack_num').AsString);
+      item.SubItems.Add(tq.FieldByName('unit_price').AsString);
+      item.SubItems.Add(tq.FieldByName('upd_time').AsString);
+//      item.SubItems.Add(tq.FieldByName('').AsString);
+      tq.Next;
+    end;
+  finally
+    FreeAndNil(tq);
+  end;
+end;
+
+procedure TFrmMain.updProductName(code:string);
+var
+   tq:TADOQuery;
+   sql:string;
+begin
+  try
+    tq := TADOQuery.Create(nil);
+    tq.Connection := qry1.Connection;
+    tq.Active:=False;
+    sql := 'select * from t_supplier_product';
+    sql := sql + ' where s_code='+QuotedStr(code);
+    tq.SQL.Text:=sql;
+    tq.Active:=True;
+    if tq.RecordCount <= 0 then
+    begin
+      exit;
+    end;
+    cbb_name.Items.Clear;
+    tq.First;
+    while(not tq.Eof)do
+    begin
+      cbb_name.Items.Add(tq.FieldByName('p_name').AsString);
+      tq.Next;
+    end;
+  finally
+    FreeAndNil(tq);
+  end;
+end;
+
+procedure TFrmMain.initDataByIndex(index:Integer);
+begin
+  if(ts_provider.TabIndex = index)then
+  begin
+    initSupplierCode;
+  end;
+end;
 procedure TFrmMain.print_memo;
 var
   f:TextFile;
 begin
 {
+,FMX.Printer, FMX.Graphics,Vcl.Imaging.pngimage,
+   System.Types,FMX.Controls, FMX.Forms, FMX.Dialogs, FMX.Edit
   AssignPrn(f);
   try
     Rewrite(f);
@@ -181,10 +304,10 @@ procedure TFrmMain.print_test;
 //   //system.close(prntext); //关闭打印文件
 //  //prntdbgrd1.print;
 //end;
-var
-  l,t,r,b: Integer;
-  s: String;
-  source, dest : TRectF;
+//var
+//  l,t,r,b: Integer;
+//  s: String;
+//  source, dest : TRectF;
 begin
       //Set default DPI for the printer. The SelectDPI routine defaults
       //to the closest available resolution as reported by the driver.
@@ -228,14 +351,6 @@ begin
       Printer.EndDoc;     }
 end;
 
-procedure TFrmMain.set_supplier_info;
-var
-  item : TListItem;
-begin
-  item := lv_supplier_product.Items.Add;
-  item.Caption := cbb_supplier_code.Text;
-  item.SubItems.Add(cbb_name.Text);
-end;
 {=====================================控件方法============================================}
 procedure TFrmMain.btn2Click(Sender: TObject);
 var
@@ -284,20 +399,26 @@ begin
 end;
 
 
-procedure TFrmMain.btn_searchClick(Sender: TObject);
+procedure TFrmMain.btn_search_supplierInfoClick(Sender: TObject);
 var
    item:TListItem;
    tq:TADOQuery;
    sql:string;
+   search_fmt : string;
 begin
   try
     tq := TADOQuery.Create(nil);
     tq.Connection := qry1.Connection;
     tq.Active:=False;
+        search_fmt := edt_search_provider.Text;
+    if(search_fmt = DEFAULT_PROVIDER_HINT_MSG)then
+    begin
+      search_fmt :='';
+    end;
     sql := 'select * from t_supplier_info where';
-    sql := sql + ' supplier_code like '+quotedstr('%'+edt_search.Text+'%');
-    sql := sql + ' or short_name like '+quotedstr('%'+edt_search.Text+'%');
-    sql := sql + ' or full_name like '+quotedstr('%'+edt_search.Text+'%');
+    sql := sql + ' supplier_code like '+quotedstr('%'+search_fmt+'%');
+    sql := sql + ' or short_name like '+quotedstr('%'+search_fmt+'%');
+    sql := sql + ' or full_name like '+quotedstr('%'+search_fmt+'%');
     tq.SQL.Text:=sql;
     tq.Active:=True;
     if tq.RecordCount <= 0 then
@@ -321,19 +442,57 @@ begin
 
 end;
 
-procedure TFrmMain.btn_search_productClick(Sender: TObject);
+procedure TFrmMain.btn_search_clientInfoClick(Sender: TObject);
+var
+   item:TListItem;
+   tq:TADOQuery;
+   sql:string;
+   search_fmt : string;
 begin
-  set_supplier_info;
+  try
+    tq := TADOQuery.Create(nil);
+    tq.Connection := qry1.Connection;
+    tq.Active:=False;
+    search_fmt := edt_search_client.Text;
+    if(search_fmt = DEFAULT_CLIENT_HINT_MSG)then
+    begin
+      search_fmt :='';
+    end;
+    sql := 'select * from t_client_info where';
+    sql := sql + ' supplier_code like '+quotedstr('%'+search_fmt+'%');
+    sql := sql + ' or short_name like '+quotedstr('%'+search_fmt+'%');
+    sql := sql + ' or full_name like '+quotedstr('%'+search_fmt+'%');
+    tq.SQL.Text:=sql;
+    tq.Active:=True;
+    if tq.RecordCount <= 0 then
+    begin
+      dm.ShowMsg('没有记录');
+      exit;
+    end;
+    lv_client_info.Items.Clear;
+    tq.First;
+    while(not tq.Eof)do
+    begin
+      item := lv_client_info.Items.Add;
+      item.Caption:=tq.FieldByName('supplier_code').AsString;
+      item.SubItems.Add(tq.FieldByName('short_name').AsString);
+      item.SubItems.Add(tq.FieldByName('full_name').AsString);
+      tq.Next;
+    end;
+  finally
+    FreeAndNil(tq);
+  end;
+
 end;
 
-procedure TFrmMain.cbb_nameChange(Sender: TObject);
+procedure TFrmMain.btn_search_productClick(Sender: TObject);
 begin
-  cbb_supplier_code.ItemIndex := cbb_name.ItemIndex;
+  set_supplier_info(trim(cbb_supplier_code.Text), Trim(cbb_name.Text));
 end;
 
 procedure TFrmMain.cbb_supplier_codeChange(Sender: TObject);
 begin
-  cbb_name.ItemIndex := cbb_supplier_code.ItemIndex;
+  updProductName(cbb_supplier_code.Text);
 end;
 
 procedure TFrmMain.dbgrd_purchase_orderDrawColumnCell(Sender: TObject;
@@ -348,16 +507,67 @@ begin
 
 end;
 
-procedure TFrmMain.edt_searchEnter(Sender: TObject);
+procedure TFrmMain.edt_search_clientEnter(Sender: TObject);
 begin
-  if(edt_search.Text = '搜索：供应商代码、简称、全名')then
-    edt_search.Text := '';
+  if(edt_search_client.Text = DEFAULT_CLIENT_HINT_MSG)then
+    edt_search_client.Text := '';
 end;
 
-procedure TFrmMain.edt_searchExit(Sender: TObject);
+procedure TFrmMain.edt_search_clientExit(Sender: TObject);
 begin
-  if Trim(edt_search.Text) = '' then
-    edt_search.Text :='搜索：供应商代码、简称、全名';
+  if Trim(edt_search_client.Text) = '' then
+    edt_search_client.Text := DEFAULT_CLIENT_HINT_MSG;
+end;
+
+procedure TFrmMain.edt_search_providerEnter(Sender: TObject);
+begin
+  if(edt_search_provider.Text = DEFAULT_PROVIDER_HINT_MSG)then
+    edt_search_provider.Text := '';
+end;
+
+procedure TFrmMain.edt_search_providerExit(Sender: TObject);
+begin
+  if Trim(edt_search_provider.Text) = '' then
+    edt_search_provider.Text := DEFAULT_PROVIDER_HINT_MSG;
+end;
+
+procedure TFrmMain.lv_client_infoDblClick(Sender: TObject);
+var
+  item : TListItem;
+  tq : TADOQuery;
+  sql :string;
+  i : Integer;
+begin
+  item := lv_client_info.Selected;
+  try
+    tq := TADOQuery.Create(nil);
+    tq.Connection := qry1.Connection;
+    tq.Active:=False;
+    sql := 'select * from t_client_info where supplier_code = '+QuotedStr(item.Caption);
+    tq.SQL.Text := sql;
+    tq.Active:=True;
+    if tq.RecordCount>0 then
+    begin
+      tq.First;
+      memo_clientInfo.Clear;
+      while not tq.Eof do
+      begin
+        for i:=0 to tq.Fields.Count-1 do
+        begin
+          memo_clientInfo.Lines.Add(tq.Fields.Fields[i].FullName+' : '+tq.Fields.Fields[i].AsString);
+        end;
+        tq.Next;
+      end;
+    end
+    else
+    begin
+      DM.ShowMsg('没有记录');
+
+      Exit;
+    end;
+  finally
+    FreeAndNil(tq);
+  end;
 end;
 
 procedure TFrmMain.lv_supplier_infoDblClick(Sender: TObject);
@@ -412,6 +622,11 @@ end;
 procedure TFrmMain.N3Click(Sender: TObject);
 begin
   FrmSet.ShowModal;
+end;
+
+procedure TFrmMain.page_mainChange(Sender: TObject);
+begin
+  initDataByIndex(page_main.ActivePageIndex);
 end;
 
 procedure TFrmMain.pm_supplierPopup(Sender: TObject);

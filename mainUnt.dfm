@@ -28,6 +28,7 @@ object FrmMain: TFrmMain
       ActivePage = TabSheet3
       Align = alClient
       TabOrder = 0
+      OnChange = page_mainChange
       object TabSheet13: TTabSheet
         Caption = #30446#24405
         ImageIndex = 14
@@ -56,7 +57,7 @@ object FrmMain: TFrmMain
           Height = 465
           Align = alClient
           TabOrder = 0
-          object edt_search: TEdit
+          object edt_search_provider: TEdit
             Left = 24
             Top = 56
             Width = 225
@@ -64,17 +65,17 @@ object FrmMain: TFrmMain
             ImeName = #20013#25991' - QQ'#25340#38899#36755#20837#27861
             TabOrder = 0
             Text = #25628#32034#65306#20379#24212#21830#20195#30721#12289#31616#31216#12289#20840#21517
-            OnEnter = edt_searchEnter
-            OnExit = edt_searchExit
+            OnEnter = edt_search_providerEnter
+            OnExit = edt_search_providerExit
           end
-          object btn_search: TButton
+          object btn_search_supplierInfo: TButton
             Left = 270
             Top = 52
             Width = 75
             Height = 25
             Caption = #26597#35810
             TabOrder = 1
-            OnClick = btn_searchClick
+            OnClick = btn_search_supplierInfoClick
           end
           object lv_supplier_info: TListView
             Left = 24
@@ -184,14 +185,9 @@ object FrmMain: TFrmMain
             Height = 21
             ImeName = #20013#25991' - QQ'#25340#38899#36755#20837#27861
             TabOrder = 1
-            Text = '1001'
             OnChange = cbb_supplier_codeChange
             Items.Strings = (
-              '1001'
-              '1002'
-              '1003'
-              '1004'
-              '1005')
+              '')
           end
           object cbb_name: TComboBox
             Left = 127
@@ -200,13 +196,6 @@ object FrmMain: TFrmMain
             Height = 21
             ImeName = #20013#25991' - QQ'#25340#38899#36755#20837#27861
             TabOrder = 2
-            Text = 'name1'
-            OnChange = cbb_nameChange
-            Items.Strings = (
-              'name1'
-              'name2'
-              'name3'
-              'name4')
           end
           object btn_search_product: TButton
             Left = 248
@@ -627,6 +616,82 @@ object FrmMain: TFrmMain
       object TabSheet5: TTabSheet
         Caption = #23458#25143#36164#26009
         ImageIndex = 4
+        object pnl6: TPanel
+          Left = 0
+          Top = 0
+          Width = 761
+          Height = 465
+          Align = alClient
+          Caption = 'pnl6'
+          TabOrder = 0
+          ExplicitLeft = 440
+          ExplicitTop = 184
+          ExplicitWidth = 185
+          ExplicitHeight = 41
+          object btn1: TButton
+            Left = 376
+            Top = 399
+            Width = 113
+            Height = 25
+            Caption = #28155#21152#23458#25143#20449#24687
+            TabOrder = 0
+          end
+          object btn_search_clientInfo: TButton
+            Left = 278
+            Top = 60
+            Width = 75
+            Height = 25
+            Caption = #26597#35810
+            TabOrder = 1
+            OnClick = btn_search_clientInfoClick
+          end
+          object edt_search_client: TEdit
+            Left = 32
+            Top = 64
+            Width = 225
+            Height = 21
+            ImeName = #20013#25991' - QQ'#25340#38899#36755#20837#27861
+            TabOrder = 2
+            Text = #25628#32034#65306#23458#25143#20195#30721#12289#31616#31216#12289#20840#21517
+            OnEnter = edt_search_clientEnter
+            OnExit = edt_search_clientExit
+          end
+          object lv_client_info: TListView
+            Left = 32
+            Top = 91
+            Width = 321
+            Height = 302
+            Columns = <
+              item
+                Caption = #23458#25143#20195#30721
+                Width = 80
+              end
+              item
+                Caption = #31616#31216
+                Width = 60
+              end
+              item
+                Caption = #20840#21517
+                Width = 160
+              end>
+            GridLines = True
+            ReadOnly = True
+            RowSelect = True
+            PopupMenu = pm_supplier
+            TabOrder = 3
+            ViewStyle = vsReport
+            OnDblClick = lv_client_infoDblClick
+          end
+          object memo_clientInfo: TMemo
+            Left = 376
+            Top = 64
+            Width = 329
+            Height = 329
+            ImeName = #20013#25991' - QQ'#25340#38899#36755#20837#27861
+            ScrollBars = ssVertical
+            TabOrder = 4
+          end
+        end
       end
       object TabSheet6: TTabSheet
         Caption = #23458#25143#37319#36141#20135#21697#20449#24687
