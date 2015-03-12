@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>1899-12-30 00:00:00.000.673,=D:\jianxie\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.418,=D:\jianxie\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.695,=D:\jianxie\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.907,C:\Users\Penn\Documents\Embarcadero\Studio\Projects\Project1.dproj=D:\jianxie\jianxie.dproj</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.107,C:\Users\Penn\Documents\Embarcadero\Studio\Projects\Unit1.dfm=D:\jianxie\mainUnt.dfm</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.203,=D:\jianxie\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.840,D:\jianxie\Unit1.pas=D:\jianxie\addSupplier.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.648,D:\jianxie\Unit1.pas=D:\jianxie\printUnt.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.677,D:\jianxie\Unit1.pas=D:\jianxie\setUnt.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.534,=D:\jianxie\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.470,=D:\jianxie\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.769,=C:\Users\Penn\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.107,C:\Users\Penn\Documents\Embarcadero\Studio\Projects\Unit1.pas=D:\jianxie\mainUnt.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.785,D:\jianxie\contactsUnt.dfm=D:\jianxie\Unit1.dfm</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.982,=D:\jianxie\DUALLIST.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.785,D:\jianxie\contactsUnt.pas=D:\jianxie\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.242,D:\jianxie\DMUnt.pas=D:\jianxie\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.677,D:\jianxie\Unit1.dfm=D:\jianxie\setUnt.dfm</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.840,D:\jianxie\Unit1.dfm=D:\jianxie\addSupplier.dfm</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.648,D:\jianxie\Unit1.dfm=D:\jianxie\printUnt.dfm</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.616,D:\jianxie\package.pas=D:\jianxie\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.242,D:\jianxie\DMUnt.dfm=D:\jianxie\Unit1.dfm</Transaction>
+  </Transactions>
+</BorlandProject>
