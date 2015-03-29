@@ -2,7 +2,7 @@ object FrmContacts: TFrmContacts
   Left = 0
   Top = 0
   Caption = #32852#31995#20154#20449#24687
-  ClientHeight = 305
+  ClientHeight = 329
   ClientWidth = 263
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -33,7 +33,7 @@ object FrmContacts: TFrmContacts
     Left = 44
     Top = 131
     Width = 24
-    Height = 17
+    Height = 13
     Caption = #37096#38376
   end
   object lbl5: TLabel
@@ -49,6 +49,13 @@ object FrmContacts: TFrmContacts
     Width = 24
     Height = 13
     Caption = #37038#31665
+  end
+  object lbl1: TLabel
+    Left = 44
+    Top = 249
+    Width = 24
+    Height = 13
+    Caption = #22791#27880
   end
   object edt_name: TEdit
     Left = 88
@@ -106,10 +113,19 @@ object FrmContacts: TFrmContacts
   end
   object btn_confirm: TButton
     Left = 112
-    Top = 253
+    Top = 288
     Width = 97
     Height = 25
     Caption = #30830#23450
     TabOrder = 5
+    OnClick = btn_confirmClick
+  end
+  object edt_note: TEdit
+    Left = 88
+    Top = 245
+    Width = 121
+    Height = 21
+    ImeName = #20013#25991' - QQ'#25340#38899#36755#20837#27861
+    TabOrder = 7
   end
 end

@@ -53,8 +53,8 @@ type
     lbl3: TLabel;
     edt2: TEdit;
     pnl3: TPanel;
-    con1: TADOConnection;
-    qry1: TADOQuery;
+    connDB: TADOConnection;
+    qryDB: TADOQuery;
     ds1: TDataSource;
     prntdbgrd1: TPrintDBgrid;
     dlgPnt1: TPrintDialog;
@@ -145,7 +145,7 @@ var
 implementation
 
 {$R *.dfm}
-       uses addSupplier, setUnt, DMUnt;
+       uses package,addSupplier, setUnt, DMUnt;
 {===============================自定义方法==================================}
 procedure TFrmMain.initSupplierCode;
 var
@@ -154,7 +154,7 @@ var
 begin
   try
     tq := TADOQuery.Create(nil);
-    tq.Connection := qry1.Connection;
+    tq.Connection := qryDb.Connection;
     tq.Active:=False;
     sql := 'select distinct s_code from t_supplier_product';
     tq.SQL.Text:=sql;
@@ -183,7 +183,7 @@ var
 begin
   try
     tq := TADOQuery.Create(nil);
-    tq.Connection := qry1.Connection;
+    tq.Connection := qryDB.Connection;
     tq.Active:=False;
     sql := 'select * from t_supplier_product';
     if(code<>'')then
@@ -226,7 +226,7 @@ var
 begin
   try
     tq := TADOQuery.Create(nil);
-    tq.Connection := qry1.Connection;
+    tq.Connection := qryDB.Connection;
     tq.Active:=False;
     sql := 'select * from t_supplier_product';
     sql := sql + ' where s_code='+QuotedStr(code);
@@ -357,7 +357,7 @@ var
   sqlstr:string;
   i: Integer;
 begin
-  with qry1 do
+  with qryDB do
   begin
     Close;
     SQL.Clear;
@@ -382,9 +382,7 @@ end;
 
 procedure TFrmMain.btn_add_supplierClick(Sender: TObject);
 begin
-  FrmAddSupplier.oper_mode := 'UPDATE';
-  FrmAddSupplier.global_info.supplier_code := 'aaa';
-  FrmAddSupplier.ShowModal;
+  FrmAddSupplier.show_modal_by_mode(OPER_MODE_ADD);
 end;
 
 procedure TFrmMain.btn_previewClick(Sender: TObject);
@@ -408,9 +406,9 @@ var
 begin
   try
     tq := TADOQuery.Create(nil);
-    tq.Connection := qry1.Connection;
+    tq.Connection := qryDB.Connection;
     tq.Active:=False;
-        search_fmt := edt_search_provider.Text;
+    search_fmt := edt_search_provider.Text;
     if(search_fmt = DEFAULT_PROVIDER_HINT_MSG)then
     begin
       search_fmt :='';
@@ -451,7 +449,7 @@ var
 begin
   try
     tq := TADOQuery.Create(nil);
-    tq.Connection := qry1.Connection;
+    tq.Connection := qryDB.Connection;
     tq.Active:=False;
     search_fmt := edt_search_client.Text;
     if(search_fmt = DEFAULT_CLIENT_HINT_MSG)then
@@ -499,7 +497,7 @@ procedure TFrmMain.dbgrd_purchase_orderDrawColumnCell(Sender: TObject;
   const Rect: TRect; DataCol: Integer; Column: TColumn; State: TGridDrawState);
 begin
   inherited;
-  if qry1.FieldByName('序号').asString ='1' then
+  if qryDB.FieldByName('序号').asString ='1' then
     dbgrd_purchase_order.Canvas.Font.Color := clRed
   else
     dbgrd_purchase_order.Canvas.Font.Color := clWindowText;
@@ -541,7 +539,7 @@ begin
   item := lv_client_info.Selected;
   try
     tq := TADOQuery.Create(nil);
-    tq.Connection := qry1.Connection;
+    tq.Connection := qryDB.Connection;
     tq.Active:=False;
     sql := 'select * from t_client_info where supplier_code = '+QuotedStr(item.Caption);
     tq.SQL.Text := sql;
@@ -580,7 +578,7 @@ begin
   item := lv_supplier_info.Selected;
   try
     tq := TADOQuery.Create(nil);
-    tq.Connection := qry1.Connection;
+    tq.Connection := qryDB.Connection;
     tq.Active:=False;
     sql := 'select * from t_supplier_info where supplier_code = '+QuotedStr(item.Caption);
     tq.SQL.Text := sql;
@@ -616,7 +614,8 @@ end;
 
 procedure TFrmMain.mi_modifyClick(Sender: TObject);
 begin
-  FrmAddSupplier.ShowModal;
+  FrmAddSupplier.upd_supplier_code := lv_supplier_info.Selected.Caption;
+  FrmAddSupplier.show_modal_by_mode(OPER_MODE_UPDATE);
 end;
 
 procedure TFrmMain.N3Click(Sender: TObject);

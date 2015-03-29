@@ -25,7 +25,7 @@ object FrmMain: TFrmMain
       Top = 0
       Width = 769
       Height = 493
-      ActivePage = TabSheet3
+      ActivePage = ts_provider
       Align = alClient
       TabOrder = 0
       OnChange = page_mainChange
@@ -114,7 +114,7 @@ object FrmMain: TFrmMain
           end
           object btn_add_supplier: TButton
             Left = 368
-            Top = 391
+            Top = 392
             Width = 113
             Height = 25
             Caption = #28155#21152#20379#24212#21830#20449#24687
@@ -624,10 +624,6 @@ object FrmMain: TFrmMain
           Align = alClient
           Caption = 'pnl6'
           TabOrder = 0
-          ExplicitLeft = 440
-          ExplicitTop = 184
-          ExplicitWidth = 185
-          ExplicitHeight = 41
           object btn1: TButton
             Left = 376
             Top = 399
@@ -1435,7 +1431,7 @@ object FrmMain: TFrmMain
     Left = 328
     Top = 376
     Bitmap = {
-      494C010102000800380010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010102000800480010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       00000000000000000000000000000000000000000000000000000000001C0202
       026DE1E1E1FF808080FF595A59DF121212D1030303C3040505B70000009E0000
@@ -1574,22 +1570,22 @@ object FrmMain: TFrmMain
       F007E00700000000FC1FF81F0000000000000000000000000000000000000000
       000000000000}
   end
-  object con1: TADOConnection
+  object connDB: TADOConnection
     ConnectionString = 
       'Provider=Microsoft.Jet.OLEDB.4.0;Password="";Data Source=D:\jian' +
-      'xie\fddemo.mdb;Persist Security Info=True'
+      'xie\ERP\fddemo.mdb;Persist Security Info=True'
     Provider = 'Microsoft.Jet.OLEDB.4.0'
     Left = 204
     Top = 312
   end
-  object qry1: TADOQuery
-    Connection = con1
+  object qryDB: TADOQuery
+    Connection = connDB
     Parameters = <>
     Left = 108
     Top = 376
   end
   object ds1: TDataSource
-    DataSet = qry1
+    DataSet = qryDB
     Left = 152
     Top = 368
   end
