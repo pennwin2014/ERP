@@ -128,4 +128,13 @@ object FrmContacts: TFrmContacts
     ImeName = #20013#25991' - QQ'#25340#38899#36755#20837#27861
     TabOrder = 7
   end
+  object qry1: TADOQuery
+    Parameters = <>
+    Left = 240
+    Top = 184
+  end
+  object con1: TADOConnection
+    Left = 232
+    Top = 248
+  end
 end

@@ -33,8 +33,6 @@ type
     edt_search_provider: TEdit;
     btn_search_supplierInfo: TButton;
     lv_supplier_info: TListView;
-    mmo_info: TMemo;
-    btn_add_supplier: TButton;
     pnl1: TPanel;
     lv_supplier_product: TListView;
     pm_tray: TPopupMenu;
@@ -53,8 +51,6 @@ type
     lbl3: TLabel;
     edt2: TEdit;
     pnl3: TPanel;
-    connDB: TADOConnection;
-    qryDB: TADOQuery;
     ds1: TDataSource;
     prntdbgrd1: TPrintDBgrid;
     dlgPnt1: TPrintDialog;
@@ -105,11 +101,11 @@ type
     edt_search_client: TEdit;
     lv_client_info: TListView;
     memo_clientInfo: TMemo;
+    mi_add: TMenuItem;
     procedure edt_search_providerEnter(Sender: TObject);
     procedure edt_search_providerExit(Sender: TObject);
     procedure btn_search_supplierInfoClick(Sender: TObject);
     procedure lv_supplier_infoDblClick(Sender: TObject);
-    procedure btn_add_supplierClick(Sender: TObject);
     procedure N3Click(Sender: TObject);
     procedure cbb_supplier_codeChange(Sender: TObject);
     procedure btn_search_productClick(Sender: TObject);
@@ -127,6 +123,7 @@ type
     procedure edt_search_clientExit(Sender: TObject);
     procedure lv_client_infoDblClick(Sender: TObject);
     procedure btn_search_clientInfoClick(Sender: TObject);
+    procedure mi_addClick(Sender: TObject);
   private
     { Private declarations }
     procedure print_memo;
@@ -134,6 +131,7 @@ type
     procedure initDataByIndex(index:Integer);
     procedure initSupplierCode;
     procedure updProductName(code:string);
+    procedure jump_to_supplier_form_and_set;
   public
     { Public declarations }
     procedure set_supplier_info(code, name:string);
@@ -154,7 +152,7 @@ var
 begin
   try
     tq := TADOQuery.Create(nil);
-    tq.Connection := qryDb.Connection;
+    tq.Connection := DM.qryDb.Connection;
     tq.Active:=False;
     sql := 'select distinct s_code from t_supplier_product';
     tq.SQL.Text:=sql;
@@ -183,7 +181,7 @@ var
 begin
   try
     tq := TADOQuery.Create(nil);
-    tq.Connection := qryDB.Connection;
+    tq.Connection := DM.qryDB.Connection;
     tq.Active:=False;
     sql := 'select * from t_supplier_product';
     if(code<>'')then
@@ -226,7 +224,7 @@ var
 begin
   try
     tq := TADOQuery.Create(nil);
-    tq.Connection := qryDB.Connection;
+    tq.Connection := DM.qryDB.Connection;
     tq.Active:=False;
     sql := 'select * from t_supplier_product';
     sql := sql + ' where s_code='+QuotedStr(code);
@@ -357,7 +355,7 @@ var
   sqlstr:string;
   i: Integer;
 begin
-  with qryDB do
+  with DM.qryDB do
   begin
     Close;
     SQL.Clear;
@@ -378,11 +376,6 @@ begin
   qry1.First;
   }
   //dbgrd_purchase_order.Columns.Add.Field.AsString:='aa';//qry1.FieldByName('Name').AsString;
-end;
-
-procedure TFrmMain.btn_add_supplierClick(Sender: TObject);
-begin
-  FrmAddSupplier.show_modal_by_mode(OPER_MODE_ADD);
 end;
 
 procedure TFrmMain.btn_previewClick(Sender: TObject);
@@ -406,7 +399,7 @@ var
 begin
   try
     tq := TADOQuery.Create(nil);
-    tq.Connection := qryDB.Connection;
+    tq.Connection := DM.qryDB.Connection;
     tq.Active:=False;
     search_fmt := edt_search_provider.Text;
     if(search_fmt = DEFAULT_PROVIDER_HINT_MSG)then
@@ -432,6 +425,14 @@ begin
       item.Caption:=tq.FieldByName('supplier_code').AsString;
       item.SubItems.Add(tq.FieldByName('short_name').AsString);
       item.SubItems.Add(tq.FieldByName('full_name').AsString);
+      item.SubItems.Add(tq.FieldByName('address').AsString);
+      item.SubItems.Add(tq.FieldByName('ship_type').AsString);
+      item.SubItems.Add(tq.FieldByName('pay_condition').AsString);
+      item.SubItems.Add(tq.FieldByName('pay_type').AsString);
+      item.SubItems.Add(tq.FieldByName('create_date').AsString);
+      item.SubItems.Add(tq.FieldByName('legal_person').AsString);
+      item.SubItems.Add(tq.FieldByName('url_addr').AsString);
+
       tq.Next;
     end;
   finally
@@ -449,7 +450,7 @@ var
 begin
   try
     tq := TADOQuery.Create(nil);
-    tq.Connection := qryDB.Connection;
+    tq.Connection := DM.qryDB.Connection;
     tq.Active:=False;
     search_fmt := edt_search_client.Text;
     if(search_fmt = DEFAULT_CLIENT_HINT_MSG)then
@@ -497,7 +498,7 @@ procedure TFrmMain.dbgrd_purchase_orderDrawColumnCell(Sender: TObject;
   const Rect: TRect; DataCol: Integer; Column: TColumn; State: TGridDrawState);
 begin
   inherited;
-  if qryDB.FieldByName('ÐòºÅ').asString ='1' then
+  if DM.qryDB.FieldByName('ÐòºÅ').asString ='1' then
     dbgrd_purchase_order.Canvas.Font.Color := clRed
   else
     dbgrd_purchase_order.Canvas.Font.Color := clWindowText;
@@ -539,7 +540,7 @@ begin
   item := lv_client_info.Selected;
   try
     tq := TADOQuery.Create(nil);
-    tq.Connection := qryDB.Connection;
+    tq.Connection := DM.qryDB.Connection;
     tq.Active:=False;
     sql := 'select * from t_client_info where supplier_code = '+QuotedStr(item.Caption);
     tq.SQL.Text := sql;
@@ -576,35 +577,14 @@ var
   i : Integer;
 begin
   item := lv_supplier_info.Selected;
-  try
-    tq := TADOQuery.Create(nil);
-    tq.Connection := qryDB.Connection;
-    tq.Active:=False;
-    sql := 'select * from t_supplier_info where supplier_code = '+QuotedStr(item.Caption);
-    tq.SQL.Text := sql;
-    tq.Active:=True;
-    if tq.RecordCount>0 then
-    begin
-      tq.First;
-      mmo_info.Clear;
-      while not tq.Eof do
-      begin
-        for i:=0 to tq.Fields.Count-1 do
-        begin
-          mmo_info.Lines.Add(tq.Fields.Fields[i].FullName+' : '+tq.Fields.Fields[i].AsString);
-        end;
-        tq.Next;
-      end;
-    end
-    else
-    begin
-      DM.ShowMsg('Ã»ÓÐ¼ÇÂ¼');
+  if item = nil then
+    Exit;
+  jump_to_supplier_form_and_set;
+end;
 
-      Exit;
-    end;
-  finally
-    FreeAndNil(tq);
-  end;
+procedure TFrmMain.mi_addClick(Sender: TObject);
+begin
+  FrmAddSupplier.show_modal_by_mode(OPER_MODE_ADD);
 end;
 
 procedure TFrmMain.mi_deleteClick(Sender: TObject);
@@ -614,9 +594,18 @@ end;
 
 procedure TFrmMain.mi_modifyClick(Sender: TObject);
 begin
-  FrmAddSupplier.upd_supplier_code := lv_supplier_info.Selected.Caption;
-  FrmAddSupplier.show_modal_by_mode(OPER_MODE_UPDATE);
+  jump_to_supplier_form_and_set;
 end;
+
+procedure TFrmMain.jump_to_supplier_form_and_set;
+begin
+  if lv_supplier_info.Selected <> nil then
+  begin
+    FrmAddSupplier.upd_supplier_code := lv_supplier_info.Selected.Caption;
+    FrmAddSupplier.show_modal_by_mode(OPER_MODE_UPDATE);
+  end;
+end;
+
 
 procedure TFrmMain.N3Click(Sender: TObject);
 begin

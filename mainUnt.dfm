@@ -80,7 +80,7 @@ object FrmMain: TFrmMain
           object lv_supplier_info: TListView
             Left = 24
             Top = 83
-            Width = 321
+            Width = 697
             Height = 302
             Columns = <
               item
@@ -94,6 +94,33 @@ object FrmMain: TFrmMain
               item
                 Caption = #20840#21517
                 Width = 160
+              end
+              item
+                Caption = #22320#22336
+                Width = 100
+              end
+              item
+                Caption = #29289#27969#26041#24335
+                Width = 90
+              end
+              item
+                Caption = #20184#27454#26465#20214
+                Width = 100
+              end
+              item
+                Caption = #20184#27454#26041#24335
+                Width = 100
+              end
+              item
+                Caption = #24314#26723#26085#26399
+                Width = 80
+              end
+              item
+                Caption = #27861#20154
+              end
+              item
+                Caption = #32593#22336
+                Width = 150
               end>
             GridLines = True
             ReadOnly = True
@@ -102,24 +129,6 @@ object FrmMain: TFrmMain
             TabOrder = 2
             ViewStyle = vsReport
             OnDblClick = lv_supplier_infoDblClick
-          end
-          object mmo_info: TMemo
-            Left = 368
-            Top = 57
-            Width = 329
-            Height = 329
-            ImeName = #20013#25991' - QQ'#25340#38899#36755#20837#27861
-            ScrollBars = ssVertical
-            TabOrder = 3
-          end
-          object btn_add_supplier: TButton
-            Left = 368
-            Top = 392
-            Width = 113
-            Height = 25
-            Caption = #28155#21152#20379#24212#21830#20449#24687
-            TabOrder = 4
-            OnClick = btn_add_supplierClick
           end
         end
       end
@@ -1431,7 +1440,7 @@ object FrmMain: TFrmMain
     Left = 328
     Top = 376
     Bitmap = {
-      494C010102000800480010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010102000800540010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       00000000000000000000000000000000000000000000000000000000001C0202
       026DE1E1E1FF808080FF595A59DF121212D1030303C3040505B70000009E0000
@@ -1570,22 +1579,7 @@ object FrmMain: TFrmMain
       F007E00700000000FC1FF81F0000000000000000000000000000000000000000
       000000000000}
   end
-  object connDB: TADOConnection
-    ConnectionString = 
-      'Provider=Microsoft.Jet.OLEDB.4.0;Password="";Data Source=D:\jian' +
-      'xie\ERP\fddemo.mdb;Persist Security Info=True'
-    Provider = 'Microsoft.Jet.OLEDB.4.0'
-    Left = 204
-    Top = 312
-  end
-  object qryDB: TADOQuery
-    Connection = connDB
-    Parameters = <>
-    Left = 108
-    Top = 376
-  end
   object ds1: TDataSource
-    DataSet = qryDB
     Left = 152
     Top = 368
   end
@@ -1693,6 +1687,10 @@ object FrmMain: TFrmMain
     OnPopup = pm_supplierPopup
     Left = 228
     Top = 256
+    object mi_add: TMenuItem
+      Caption = #22686#21152#20449#24687
+      OnClick = mi_addClick
+    end
     object mi_modify: TMenuItem
       Caption = #31649#29702#20449#24687
       OnClick = mi_modifyClick

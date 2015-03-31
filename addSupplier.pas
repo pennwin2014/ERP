@@ -34,8 +34,6 @@ type
     edt_url: TEdit;
     Label4: TLabel;
     edt_pay_condition: TEdit;
-    con_db: TADOConnection;
-    qry_db: TADOQuery;
     lv_contacts: TListView;
     pm_contacts: TPopupMenu;
     mi_add: TMenuItem;
@@ -56,6 +54,9 @@ type
     procedure FormShow(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure mi_modifyClick(Sender: TObject);
+    procedure lv_contactsDblClick(Sender: TObject);
+    procedure mi_deleteClick(Sender: TObject);
   private
     { Private declarations }
     contact_list : TList<TContactsInfo>;
@@ -64,10 +65,14 @@ type
     oper_mode : string;
     global_info : TSupplierInfo;
     global_bank : TSupplierBank;
+    procedure clear_form;
     //增
     function insert_one_supplier(info : TSupplierInfo):Integer;
     function insert_one_supplier_bank(bank : TSupplierBank):Integer;
     function insert_one_contact(contact : TContactsInfo):Integer;
+    //删
+    function delete_contacts_by_supplier_code(code : string):Integer;
+
     //改
     function update_supplier_info(info : TSupplierInfo):Integer;
     function update_supplier_bank(bank : TSupplierBank):Integer;
@@ -79,11 +84,14 @@ type
     procedure refresh_supplier_info;
     procedure refresh_supplier_bank;
     procedure save_contacts_list(code:string);
+    procedure update_contacts_list_to_db(code:string);
+    procedure jump_to_contact_form_and_set;
   public
     { Public declarations }
     upd_supplier_code : string;
     procedure show_modal_by_mode(mode:string);
     procedure add_one_contact_to_form(contact:TContactsInfo);
+    procedure update_one_contact_to_form(id:Integer;contact:TContactsInfo);
   end;
 
 var
@@ -96,40 +104,59 @@ implementation
 procedure TFrmAddSupplier.save_contacts_list(code:string);
 var
   i,ret:Integer;
-  item : TListItem;
-  contact : TContactsInfo;
 begin
-  contact_list.Clear;
-  for  i:=0 to lv_contacts.Items.Count-1 do
+  for  i:=0 to contact_list.Count-1 do
   begin
-    item := lv_contacts.Items.Item[i];
-    contact.supplier_code := code;
-    contact.name := item.Caption;
-    contact.phone := item.SubItems.Strings[0];
-    contact.adept := item.SubItems.Strings[1];
-    contact.title := item.SubItems.Strings[2];
-    contact.email := item.SubItems.Strings[3];
-    contact.note := item.SubItems.Strings[4];
-    ret := insert_one_contact(contact);
+    ret := insert_one_contact(contact_list[i]);
     if (ret = JX_DB_SUCCESS) then
     begin
-      contact_list.Add(contact);
+      DM.Log('插入contact失败');
     end;
   end;
 end;
 
+procedure TFrmAddSupplier.update_contacts_list_to_db(code:string);
+var
+  i:Integer;
+begin
+  for I := 0 to contact_list.Count-1 do
+  begin
+    //如果id是0也认为是新添加的
+    if contact_list[i].id = 0 then
+    begin
+      DM.insert_one_contact(contact_list[i]);
+    end
+    else if contact_list[i].ischanged = True then
+    begin
+      DM.update_contact_by_id(contact_list[i].id, contact_list[i]);
+    end;
+  end;
+
+end;
+
+
+procedure TFrmAddSupplier.update_one_contact_to_form(id:Integer; contact:TContactsInfo);
+var
+  i:Integer;
+begin
+  for i := 0 to contact_list.Count-1 do
+  begin
+    if contact_list[i].id = id then
+    begin
+      contact_list.Delete(i);
+      Break;
+    end;
+  end;
+  contact.ischanged := True;
+  contact_list.Add(contact);
+  refresh_contacts_list;
+end;
+
 {作用：添加一个联系人信息到窗体}
 procedure TFrmAddSupplier.add_one_contact_to_form(contact:TContactsInfo);
-var
-  item:TListItem;
 begin
-  item := lv_contacts.items.Add;
-  item.Caption := contact.name;
-  item.SubItems.Add(contact.phone);
-  item.SubItems.Add(contact.adept);
-  item.SubItems.Add(contact.title);
-  item.SubItems.Add(contact.email);
-  item.SubItems.Add(contact.note);
+  contact_list.Add(contact);
+  refresh_contacts_list;
 end;
 
 {过程作用：根据类型显示界面}
@@ -170,16 +197,16 @@ var
   i:Integer;
   item:TListItem;
 begin
+  lv_contacts.Items.Clear;
   for i:=0 to contact_list.Count-1 do
   begin
-    lv_contacts.Items.Clear;
     item := lv_contacts.Items.Add;
     item.Caption := contact_list[i].name;
     item.SubItems.Add(contact_list[i].phone);
     item.SubItems.Add(contact_list[i].adept);
     item.SubItems.Add(contact_list[i].title);
     item.SubItems.Add(contact_list[i].email);
-    item.SubItems.Add(contact_list[i].note);
+    item.SubItems.Add(contact_list[i].notes);
   end;
 end;
 
@@ -196,7 +223,6 @@ begin
     mi_modify.Enabled :=True;
     mi_delete.Enabled :=True;
   end;
-  mi_add.Enabled := info_has_value;
 end;
 
 {========================控件方法=============================}
@@ -254,10 +280,8 @@ begin
         bank_has_value := True;
       end;
     end;
-    //根据列表的信息添加联系人信息
+      //根据列表的信息添加联系人信息
     save_contacts_list(info.supplier_code);
-    DM.ShowMsg('添加成功!!');
-    Self.Close;
   end
   else if oper_mode = OPER_MODE_UPDATE then
   begin
@@ -274,7 +298,7 @@ begin
       Exit;
     end;
     //更新银行信息
-    ret := update_supplier_bank(info);
+    ret := update_supplier_bank(bank);
     if ret = JX_DB_SUCCESS then
     begin
       //重新读取银行信息
@@ -285,10 +309,11 @@ begin
       DM.ShowMsg('更新失败!!');
       Exit;
     end;
-    //清空联系人列表，再重新根据界面上的来添加
-    save_contacts_list(info.supplier_code);
+    //更新那些ischange值为true的
+    update_contacts_list_to_db(info.supplier_code);
   end;
-
+  DM.ShowMsg('保存成功!!');
+  Self.Close;
 
 end;
 
@@ -302,6 +327,32 @@ begin
   contact_list.Free;
 end;
 
+procedure TFrmAddSupplier.clear_form;
+begin
+  //清空用户信息
+  global_info.id := 0;
+  global_info.supplier_code := '';
+  global_info.short_name := '';
+  global_info.full_name :='';
+  global_info.address := '';
+  global_info.ship_type :='';
+  global_info.pay_condition :='';
+  global_info.pay_type :='';
+  global_info.create_date := DateToStr(Now);
+  global_info.legal_person :='';
+  global_info.url_addr :='';
+  //清空银行信息
+  global_bank.id := 0;
+  global_bank.supplier_code :='';
+  global_bank.bank_name :='';
+  global_bank.bank_account :='';
+  global_bank.tax_no :='';
+  //清空联系人
+  refresh_supplier_info;
+  refresh_supplier_bank;
+  refresh_contacts_list;
+end;
+
 procedure TFrmAddSupplier.FormShow(Sender: TObject);
 var
   ret : Integer;
@@ -313,6 +364,7 @@ begin
     info_has_value := False;
     bank_has_value := False;
     contact_list.Clear;
+    clear_form;
   end
   else if oper_mode = OPER_MODE_UPDATE then
   begin
@@ -351,7 +403,7 @@ begin
   Result := JX_DB_SUCCESS;
   try
     tq := TADOQuery.Create(nil);
-    tq.Connection := qry_db.Connection;
+    tq.Connection := DM.qryDB.Connection;
     tq.Active:=False;
     sql := 'select * from t_supplier_bank where supplier_code='+QuotedStr(code);
     tq.SQL.Text := sql;
@@ -391,7 +443,7 @@ begin
   Result := JX_DB_SUCCESS;
   try
     tq := TADOQuery.Create(nil);
-    tq.Connection := qry_db.Connection;
+    tq.Connection := DM.qryDB.Connection;
     tq.Active:=False;
     sql := 'select * from t_supplier_info where supplier_code='+QuotedStr(code);
     tq.SQL.Text := sql;
@@ -437,27 +489,31 @@ var
 begin
   Result := JX_DB_SUCCESS;
   try
-    tq := TADOQuery.Create(nil);
-    tq.Connection := qry_db.Connection;
+//    tq := TADOQuery.Create(nil);
+//    tq.Connection := DM.qryDB.Connection;
+    DM.create_db_handler(tq);
     tq.Active:=False;
     sql := 'select * from t_supplier_contacts where supplier_code='+QuotedStr(code);
     tq.SQL.Text := sql;
     tq.Active:=True;
+    contact_list.Clear;
     if tq.RecordCount <= 0 then
     begin
       Result:=JX_DB_NOT_FOUND;
       Exit;
     end;
-    contact_list.Clear;
     tq.First;
     while(not tq.Eof)do
     begin
+      contact_info.id := tq.FieldByName('id').AsInteger;
+      contact_info.supplier_code := code;
       contact_info.name := tq.FieldByName('name').AsString;
       contact_info.phone := tq.FieldByName('phone').AsString;
       contact_info.adept := tq.FieldByName('adept').AsString;
       contact_info.title := tq.FieldByName('title').AsString;
       contact_info.email := tq.FieldByName('email').AsString;
-      contact_info.note := tq.FieldByName('note').AsString;
+      contact_info.notes := tq.FieldByName('notes').AsString;
+      contact_info.ischanged := False;
       contact_list.Add(contact_info);
       tq.Next;
     end;
@@ -477,16 +533,16 @@ begin
   Result := JX_DB_SUCCESS;
   try
     tq := TADOQuery.Create(nil);
-    tq.Connection := qry_db.Connection;
+    tq.Connection := DM.qryDB.Connection;
     sql := 'insert into t_supplier_contacts(';
-    sql := sql +'supplier_code, name, phone, adept, title, email, note) values(';
+    sql := sql +'supplier_code, name, phone, adept, title, email, notes) values(';
     sql := sql +'"'+(contact.supplier_code) +'",';
     sql := sql +'"'+(contact.name)+'",';
     sql := sql +'"'+(contact.phone)+'",';
     sql := sql +'"'+(contact.adept)+'",';
     sql := sql +'"'+(contact.title)+'",';
     sql := sql +'"'+(contact.email)+'",';
-    sql := sql +'"'+(contact.note)+'")';
+    sql := sql +'"'+(contact.notes)+'")';
     tq.SQL.Text := sql;
     tq.Connection.BeginTrans;
     tq.ExecSQL;
@@ -508,7 +564,7 @@ begin
   Result := JX_DB_SUCCESS;
   try
     tq := TADOQuery.Create(nil);
-    tq.Connection := qry_db.Connection;
+    tq.Connection := DM.qryDB.Connection;
     sql := 'insert into t_supplier_bank(';
     sql := sql +'supplier_code, bank_name, bank_account, tax_no) values(';
     sql := sql +'"'+(bank.supplier_code) +'",';
@@ -528,6 +584,36 @@ begin
   end;
 end;
 
+procedure TFrmAddSupplier.lv_contactsDblClick(Sender: TObject);
+begin
+  jump_to_contact_form_and_set;
+end;
+
+//删
+function TFrmAddSupplier.delete_contacts_by_supplier_code(code : string):Integer;
+var
+  tq: TADOQuery;
+  sql : string;
+begin
+  Result := JX_DB_SUCCESS;
+  try
+    tq := TADOQuery.Create(nil);
+    tq.Connection := DM.qryDB.Connection;
+    sql := 'delete from t_supplier_contacts';
+    sql := sql + ' where supplier_code='+QuotedStr(code);
+    tq.SQL.Text := sql;
+    tq.Connection.BeginTrans;
+    tq.ExecSQL;
+    tq.Connection.CommitTrans;
+  except
+    DM.Log('删除表 t_supplier_contacts出错!!');
+    tq.Connection.RollbackTrans;
+    FreeAndNil(tq);
+    Result := JX_DB_INSERT_ERROR;
+    Exit;
+  end;
+end;
+
 //改
 function TFrmAddSupplier.update_supplier_info(info : TSupplierInfo):Integer;
 var
@@ -537,12 +623,18 @@ begin
   Result := JX_DB_SUCCESS;
   try
     tq := TADOQuery.Create(nil);
-    tq.Connection := qry_db.Connection;
-    sql := 'update t_supplier_info set';
+    tq.Connection := DM.qryDB.Connection;
+    sql := 'update t_supplier_info set ';
     sql := sql + 'short_name='+QuotedStr(info.short_name) +',';
-    sql := sql + 'bank_account='+QuotedStr(bank.bank_account) +',';
-    sql := sql + 'tax_no='+QuotedStr(bank.tax_no);
-    sql := sql + ' where supplier_code='+QuotedStr(bank.supplier_code);
+    sql := sql + 'full_name='+QuotedStr(info.full_name) +',';
+    sql := sql + 'address='+QuotedStr(info.address) +',';
+    sql := sql + 'ship_type='+QuotedStr(info.ship_type) +',';
+    sql := sql + 'pay_condition='+QuotedStr(info.pay_condition) +',';
+    sql := sql + 'pay_type='+QuotedStr(info.pay_type) +',';
+    sql := sql + 'create_date='+QuotedStr(info.create_date) +',';
+    sql := sql + 'legal_person='+QuotedStr(info.legal_person) +',';
+    sql := sql + 'url_addr='+QuotedStr(info.url_addr);
+    sql := sql + ' where supplier_code='+QuotedStr(info.supplier_code);
     tq.SQL.Text := sql;
     tq.Connection.BeginTrans;
     tq.ExecSQL;
@@ -564,11 +656,11 @@ begin
   Result := JX_DB_SUCCESS;
   try
     tq := TADOQuery.Create(nil);
-    tq.Connection := qry_db.Connection;
-    sql := 'update t_supplier_bank set';
-    sql := sql + 'bank_name='+QuotedStr(bank.bank_name) +',';
-    sql := sql + 'bank_account='+QuotedStr(bank.bank_account) +',';
-    sql := sql + 'tax_no='+QuotedStr(bank.tax_no);
+    tq.Connection := DM.qryDB.Connection;
+    sql := 'update t_supplier_bank set ';
+    sql := sql + ' bank_name='+QuotedStr(bank.bank_name) +',';
+    sql := sql + ' bank_account='+QuotedStr(bank.bank_account) +',';
+    sql := sql + ' tax_no='+QuotedStr(bank.tax_no);
     sql := sql + ' where supplier_code='+QuotedStr(bank.supplier_code);
     tq.SQL.Text := sql;
     tq.Connection.BeginTrans;
@@ -591,7 +683,7 @@ begin
   Result := JX_DB_SUCCESS;
   try
     tq := TADOQuery.Create(nil);
-    tq.Connection := qry_db.Connection;
+    tq.Connection := DM.qryDB.Connection;
     tq.Active:=False;
     sql := 'insert into t_supplier_info(';
     sql := sql +'supplier_code, short_name, full_name,address, ship_type, pay_condition,';
@@ -625,6 +717,45 @@ begin
   FrmContacts.show_modal_by_mode(OPER_MODE_ADD);
 end;
 
+procedure TFrmAddSupplier.mi_deleteClick(Sender: TObject);
+var
+  item : TListItem;
+  code : string;
+  i: Integer;
+begin
+  item := lv_contacts.Selected;
+  if(item <> nil)then
+  begin
+//    code := contact_list[item.Index].supplier_code;
+//    delete_contacts_by_supplier_code(code);
+//    get_contact_list_by_supplier_code(code, contact_list);
+    if(JX_DB_SUCCESS <> DM.delete_contact_by_id(contact_list[item.index].id))then
+    begin
+      DM.ShowMsg('删除失败');
+      exit;
+    end;
+    contact_list.Delete(item.Index);
+    refresh_contacts_list;
+  end;
+end;
 
+procedure TFrmAddSupplier.mi_modifyClick(Sender: TObject);
+begin
+  jump_to_contact_form_and_set;
+end;
+
+procedure TFrmAddSupplier.jump_to_contact_form_and_set;
+var
+  index :Integer;
+  sel_contact : TContactsInfo;
+begin
+  index := lv_contacts.Selected.Index;
+  if index >=0 then
+  begin
+    FrmContacts.global_contact := contact_list.Items[index];
+    FrmContacts.supplier_code := global_info.supplier_code;
+    FrmContacts.show_modal_by_mode(OPER_MODE_UPDATE);
+  end;
+end;
 
 end.

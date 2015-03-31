@@ -47,10 +47,6 @@ object FrmAddSupplier: TFrmAddSupplier
       Height = 271
       Align = alClient
       TabOrder = 1
-      ExplicitLeft = 256
-      ExplicitTop = 184
-      ExplicitWidth = 185
-      ExplicitHeight = 41
       object pgc_supplier_info: TPageControl
         Left = 1
         Top = 1
@@ -59,12 +55,8 @@ object FrmAddSupplier: TFrmAddSupplier
         ActivePage = ts_contacts
         Align = alClient
         TabOrder = 0
-        ExplicitWidth = 528
-        ExplicitHeight = 256
         object ts_base_info: TTabSheet
           Caption = #22522#26412#20449#24687
-          ExplicitWidth = 520
-          ExplicitHeight = 228
           object lbl1: TLabel
             Left = 14
             Top = 24
@@ -231,7 +223,6 @@ object FrmAddSupplier: TFrmAddSupplier
         object ts_bank_info: TTabSheet
           Caption = #36134#25143#20449#24687
           ImageIndex = 1
-          ExplicitHeight = 226
           object lbl3: TLabel
             Left = 48
             Top = 43
@@ -279,9 +270,8 @@ object FrmAddSupplier: TFrmAddSupplier
           end
         end
         object ts_contacts: TTabSheet
-          Caption = #32852#31995#20154
+          Caption = #32852#31995#20154#21015#34920
           ImageIndex = 2
-          ExplicitHeight = 226
           object lv_contacts: TListView
             Left = 0
             Top = 0
@@ -313,27 +303,15 @@ object FrmAddSupplier: TFrmAddSupplier
                 Caption = #22791#27880
                 Width = 150
               end>
+            RowSelect = True
             PopupMenu = pm_contacts
             TabOrder = 0
             ViewStyle = vsReport
+            OnDblClick = lv_contactsDblClick
           end
         end
       end
     end
-  end
-  object con_db: TADOConnection
-    ConnectionString = 
-      'Provider=Microsoft.Jet.OLEDB.4.0;Password="";Data Source=D:\jian' +
-      'xie\ERP\fddemo.mdb;Persist Security Info=True'
-    Provider = 'Microsoft.Jet.OLEDB.4.0'
-    Left = 77
-    Top = 265
-  end
-  object qry_db: TADOQuery
-    Connection = con_db
-    Parameters = <>
-    Left = 37
-    Top = 265
   end
   object pm_contacts: TPopupMenu
     OnPopup = pm_contactsPopup
@@ -345,9 +323,11 @@ object FrmAddSupplier: TFrmAddSupplier
     end
     object mi_modify: TMenuItem
       Caption = #20462#25913
+      OnClick = mi_modifyClick
     end
     object mi_delete: TMenuItem
       Caption = #21024#38500
+      OnClick = mi_deleteClick
     end
   end
 end

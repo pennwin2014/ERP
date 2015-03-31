@@ -46,7 +46,8 @@ TContactsInfo = record
   adept : string;  //部门
   title : string;  //职务
   email : string;  //邮箱
-  note : string;   //备注
+  notes : string;   //备注
+  ischanged : Boolean; //是否被改
  end;
 implementation
 
