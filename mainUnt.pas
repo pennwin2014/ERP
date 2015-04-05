@@ -124,6 +124,7 @@ type
     procedure lv_client_infoDblClick(Sender: TObject);
     procedure btn_search_clientInfoClick(Sender: TObject);
     procedure mi_addClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
     procedure print_memo;
@@ -143,7 +144,7 @@ var
 implementation
 
 {$R *.dfm}
-       uses package,addSupplier, setUnt, DMUnt;
+       uses package,addSupplier, setUnt, DMUnt, SupplierProduct;
 {===============================自定义方法==================================}
 procedure TFrmMain.initSupplierCode;
 var
@@ -154,7 +155,7 @@ begin
     tq := TADOQuery.Create(nil);
     tq.Connection := DM.qryDb.Connection;
     tq.Active:=False;
-    sql := 'select distinct s_code from t_supplier_product';
+    sql := 'select distinct supplier_code from t_supplier_info';
     tq.SQL.Text:=sql;
     tq.Active:=True;
     if tq.RecordCount <= 0 then
@@ -165,7 +166,7 @@ begin
     tq.First;
     while(not tq.Eof)do
     begin
-      cbb_supplier_code.Items.Add(tq.FieldByName('s_code').AsString);
+      cbb_supplier_code.Items.Add(tq.FieldByName('supplier_code').AsString);
       tq.Next;
     end;
   finally
@@ -185,7 +186,7 @@ begin
     tq.Active:=False;
     sql := 'select * from t_supplier_product';
     if(code<>'')then
-      sql := sql + ' where s_code='+QuotedStr(code);
+      sql := sql + ' where supplier_code='+QuotedStr(code);
     if(name<>'')then
       sql := sql+ ' and p_name='+QuotedStr(name);
     tq.SQL.Text:=sql;
@@ -227,7 +228,7 @@ begin
     tq.Connection := DM.qryDB.Connection;
     tq.Active:=False;
     sql := 'select * from t_supplier_product';
-    sql := sql + ' where s_code='+QuotedStr(code);
+    sql := sql + ' where supplier_code='+QuotedStr(code);
     tq.SQL.Text:=sql;
     tq.Active:=True;
     if tq.RecordCount <= 0 then
@@ -248,7 +249,8 @@ end;
 
 procedure TFrmMain.initDataByIndex(index:Integer);
 begin
-  if(ts_provider.TabIndex = index)then
+//供应商产品信息界面的话需要初始化供应商列表
+  if(ts_products_p.TabIndex = index)then
   begin
     initSupplierCode;
   end;
@@ -492,6 +494,8 @@ end;
 procedure TFrmMain.cbb_supplier_codeChange(Sender: TObject);
 begin
   updProductName(cbb_supplier_code.Text);
+  cbb_name.Text := cbb_name.Items.Strings[0];
+  lv_supplier_product.Items.Clear;
 end;
 
 procedure TFrmMain.dbgrd_purchase_orderDrawColumnCell(Sender: TObject;
@@ -528,6 +532,14 @@ procedure TFrmMain.edt_search_providerExit(Sender: TObject);
 begin
   if Trim(edt_search_provider.Text) = '' then
     edt_search_provider.Text := DEFAULT_PROVIDER_HINT_MSG;
+end;
+
+procedure TFrmMain.FormCreate(Sender: TObject);
+begin
+  //先初始化数据
+  initSupplierCode;
+  //读取所有单位
+  DM.readAllProductUnit;
 end;
 
 procedure TFrmMain.lv_client_infoDblClick(Sender: TObject);
@@ -584,7 +596,15 @@ end;
 
 procedure TFrmMain.mi_addClick(Sender: TObject);
 begin
-  FrmAddSupplier.show_modal_by_mode(OPER_MODE_ADD);
+  if page_main.ActivePage = ts_provider then
+  begin
+      FrmAddSupplier.show_modal_by_mode(OPER_MODE_ADD);
+  end
+  else if page_main.ActivePage = ts_products_p then
+  begin
+    FrmSupplierProduct.show_modal_by_mode(OPER_MODE_ADD, Trim(cbb_supplier_code.Text));
+  end;
+
 end;
 
 procedure TFrmMain.mi_deleteClick(Sender: TObject);
@@ -594,7 +614,15 @@ end;
 
 procedure TFrmMain.mi_modifyClick(Sender: TObject);
 begin
-  jump_to_supplier_form_and_set;
+  if page_main.ActivePage = ts_provider then
+  begin
+    jump_to_supplier_form_and_set;
+  end
+  else if page_main.ActivePage = ts_products_p then
+  begin
+    FrmSupplierProduct.ShowModal;
+  end;
+
 end;
 
 procedure TFrmMain.jump_to_supplier_form_and_set;
@@ -619,16 +647,34 @@ end;
 
 procedure TFrmMain.pm_supplierPopup(Sender: TObject);
 begin
-  if lv_supplier_info.SelCount = 0 then
+  if page_main.ActivePage = ts_provider then
   begin
-    mi_modify.Enabled :=False;
-    mi_delete.Enabled :=False;
+    if lv_supplier_info.SelCount = 0 then
+    begin
+      mi_modify.Enabled :=False;
+      mi_delete.Enabled :=False;
+    end
+    else
+    begin
+      mi_modify.Enabled :=True;
+      mi_delete.Enabled :=True;
+    end;
   end
-  else
+  //供应商产品信息
+  else if page_main.ActivePage = ts_products_p then
   begin
-    mi_modify.Enabled :=True;
-    mi_delete.Enabled :=True;
+    if lv_supplier_product.SelCount = 0 then
+    begin
+      mi_modify.Enabled :=False;
+      mi_delete.Enabled :=False;
+    end
+    else
+    begin
+      mi_modify.Enabled :=True;
+      mi_delete.Enabled :=True;
+    end;
   end;
+
 end;
 
 end.

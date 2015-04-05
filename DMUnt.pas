@@ -3,7 +3,7 @@ unit DMUnt;
 interface
 
 uses
-  System.SysUtils, System.Classes, Vcl.Forms, Winapi.Windows, Winapi.Messages,
+  System.SysUtils, System.Classes, Generics.Collections, Vcl.Forms, Winapi.Windows, Winapi.Messages,
   Data.DB, Data.Win.ADODB,package;
 
 const DEFAULT_PROVIDER_HINT_MSG = '搜索：供应商代码、简称、全名';
@@ -21,6 +21,7 @@ type
   public
     { Public declarations }
     company_name : PWideChar;
+    unit_list : TList<TProductUnit>;
     procedure ShowMsg(m_str:pWideChar);
     procedure Log(m_str:PWideChar);
 //    procedure refresh_db;
@@ -29,6 +30,7 @@ type
     function insert_one_contact(contact : TContactsInfo):Integer;
     function update_contact_by_id(id:Integer; info:TContactsInfo):Integer;
     function delete_contact_by_id(id : Integer):Integer;
+    function readAllProductUnit:Integer;
 
   end;
 
@@ -67,9 +69,47 @@ end;
 procedure TDM.DataModuleCreate(Sender: TObject);
 begin
   company_name := '昆山建协电子塑胶有限公司';
+  //
+  unit_list := TList<TProductUnit>.Create;
 end;
 
 {=====================数据库操作==========================}
+function TDM.readAllProductUnit:Integer;
+var
+  tq: TADOQuery;
+  sql : string;
+  one_unit : TProductUnit;
+begin
+  Result := JX_DB_SUCCESS;
+  try
+    unit_list.Clear;
+    tq := TADOQuery.Create(nil);
+    tq.Connection := DM.qryDB.Connection;
+    tq.Active := False;
+    sql := 'select * from t_product_unit';
+    tq.SQL.Text := sql;
+    tq.Active := True;
+    if tq.RecordCount <= 0 then
+    begin
+//      Result := JX_DB_NOT_FOUND;
+      Exit;
+    end;
+    tq.First;
+    while not tq.Eof do
+    begin
+      one_unit.id := tq.FieldByName('id').AsInteger;
+      one_unit.unit_str := tq.FieldByName('unit_str').AsString;
+      unit_list.Add(one_unit);
+      tq.Next;
+    end;
+  except
+    FreeAndNil(tq);
+    Result := JX_DB_READ_ERROR;
+    Exit;
+  end;
+
+end;
+
 function TDM.delete_contact_by_id(id : Integer):Integer;
 var
   tq: TADOQuery;
