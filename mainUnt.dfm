@@ -21,21 +21,18 @@ object FrmMain: TFrmMain
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitWidth = 769
     object page_main: TPageControl
       Left = 0
       Top = 0
       Width = 847
       Height = 493
-      ActivePage = ts_products_p
+      ActivePage = TabSheet7
       Align = alClient
       TabOrder = 0
       OnChange = page_mainChange
-      ExplicitWidth = 769
       object TabSheet13: TTabSheet
         Caption = #30446#24405
         ImageIndex = 14
-        ExplicitWidth = 761
         object TreeView1: TTreeView
           Left = 64
           Top = 32
@@ -54,7 +51,6 @@ object FrmMain: TFrmMain
       end
       object ts_provider: TTabSheet
         Caption = #20379#24212#21830#36164#26009
-        ExplicitWidth = 761
         object Panel2: TPanel
           Left = 0
           Top = 0
@@ -62,7 +58,6 @@ object FrmMain: TFrmMain
           Height = 465
           Align = alClient
           TabOrder = 0
-          ExplicitWidth = 761
           object edt_search_provider: TEdit
             Left = 24
             Top = 56
@@ -141,7 +136,6 @@ object FrmMain: TFrmMain
       object ts_products_p: TTabSheet
         Caption = #20379#24212#21830#20135#21697#20449#24687
         ImageIndex = 1
-        ExplicitWidth = 761
         object pnl1: TPanel
           Left = 0
           Top = 0
@@ -150,7 +144,6 @@ object FrmMain: TFrmMain
           Align = alClient
           Caption = 'pnl1'
           TabOrder = 0
-          ExplicitWidth = 761
           object lv_supplier_product: TListView
             Left = 16
             Top = 56
@@ -230,7 +223,6 @@ object FrmMain: TFrmMain
       object TabSheet3: TTabSheet
         Caption = #37319#36141#35746#21333'('#25171#21360')'
         ImageIndex = 2
-        ExplicitWidth = 761
         object pnl3: TPanel
           Left = 0
           Top = 0
@@ -238,7 +230,6 @@ object FrmMain: TFrmMain
           Height = 465
           Align = alClient
           TabOrder = 0
-          ExplicitWidth = 761
           object pnl4: TPanel
             Left = 1
             Top = 288
@@ -247,7 +238,6 @@ object FrmMain: TFrmMain
             Align = alBottom
             Caption = 'pnl4'
             TabOrder = 0
-            ExplicitWidth = 759
             object dbgrd_purchase_order: TDBGrid
               Left = 1
               Top = 1
@@ -273,7 +263,6 @@ object FrmMain: TFrmMain
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 1
-            ExplicitWidth = 759
             object lbl4: TLabel
               Left = 353
               Top = 73
@@ -580,7 +569,6 @@ object FrmMain: TFrmMain
       object TabSheet4: TTabSheet
         Caption = #20837#24211#26126#32454
         ImageIndex = 3
-        ExplicitWidth = 761
         object lbl2: TLabel
           Left = 48
           Top = 72
@@ -640,7 +628,6 @@ object FrmMain: TFrmMain
       object TabSheet5: TTabSheet
         Caption = #23458#25143#36164#26009
         ImageIndex = 4
-        ExplicitWidth = 761
         object pnl6: TPanel
           Left = 0
           Top = 0
@@ -649,7 +636,6 @@ object FrmMain: TFrmMain
           Align = alClient
           Caption = 'pnl6'
           TabOrder = 0
-          ExplicitWidth = 761
           object btn1: TButton
             Left = 376
             Top = 399
@@ -718,47 +704,38 @@ object FrmMain: TFrmMain
       object TabSheet6: TTabSheet
         Caption = #23458#25143#37319#36141#20135#21697#20449#24687
         ImageIndex = 5
-        ExplicitWidth = 761
       end
       object TabSheet7: TTabSheet
         Caption = #38144#21806#25253#20215
         ImageIndex = 6
-        ExplicitWidth = 761
       end
       object TabSheet8: TTabSheet
         Caption = #38144#21806#35746#21333
         ImageIndex = 7
-        ExplicitWidth = 761
       end
       object TabSheet1: TTabSheet
         Caption = #20986#24211#21333#65288#25171#21360#65289
         ImageIndex = 8
-        ExplicitWidth = 761
       end
       object TabSheet2: TTabSheet
         Caption = #24211#23384#26126#32454
         ImageIndex = 9
-        ExplicitWidth = 761
       end
       object TabSheet9: TTabSheet
         Caption = #22791#26009#21333'('#25171#21360')'
         ImageIndex = 10
-        ExplicitWidth = 761
       end
       object TabSheet10: TTabSheet
         Caption = #38656#24320#31080#26126#32454
         ImageIndex = 11
-        ExplicitWidth = 761
       end
       object TabSheet11: TTabSheet
         Caption = #24212#25910#26126#32454
         ImageIndex = 12
-        ExplicitWidth = 761
       end
       object TabSheet12: TTabSheet
         Caption = #24212#20184#26126#32454
         ImageIndex = 13
-        ExplicitWidth = 761
       end
     end
   end
@@ -1466,7 +1443,7 @@ object FrmMain: TFrmMain
     Left = 328
     Top = 376
     Bitmap = {
-      494C010102000800580010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C0101020008005C0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       00000000000000000000000000000000000000000000000000000000001C0202
       026DE1E1E1FF808080FF595A59DF121212D1030303C3040505B70000009E0000
@@ -1714,7 +1691,7 @@ object FrmMain: TFrmMain
     Left = 228
     Top = 256
     object mi_add: TMenuItem
-      Caption = #22686#21152#20449#24687
+      Caption = #22686#21152#20379#24212#21830
       OnClick = mi_addClick
     end
     object mi_modify: TMenuItem
@@ -1722,7 +1699,7 @@ object FrmMain: TFrmMain
       OnClick = mi_modifyClick
     end
     object mi_delete: TMenuItem
-      Caption = #21024#38500#20449#24687
+      Caption = #21024#38500
       OnClick = mi_deleteClick
     end
   end

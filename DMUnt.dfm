@@ -14,7 +14,7 @@ object DM: TDM
       'Provider=Microsoft.Jet.OLEDB.4.0;Password="";Data Source=D:\jian' +
       'xie\ERP\fddemo.mdb;Persist Security Info=True'
     Provider = 'Microsoft.Jet.OLEDB.4.0'
-    Left = 204
-    Top = 261
+    Left = 220
+    Top = 141
   end
 end
